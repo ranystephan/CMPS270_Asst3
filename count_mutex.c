@@ -3,8 +3,9 @@
 #include <pthread.h>
 #include <time.h>
 
+
 long *array; // Global variable that the sequential function cont1s() will return its answer into
-long array_length = 10000000; // Global variable modifiied by multiple threads
+long array_length = 1000000000; // Global variable modifiied by multiple threads
 int correct_count = 0; // Number of threads
 int count = 0; // Number of threads
 int ThreadsNumber = 16; // Number of threads
@@ -66,47 +67,63 @@ void *threadCounting(void *id)
     }
 }
 
-int main()
-{
-    pthread_mutex_init(&lock, NULL);
 
-    clock_t start_time, check_time1, end_time;
+int main(){
+    printf("Array Length\tThreads Number\tSequential Time\tCorrect Count\tParallel Time\tCount\n");
 
-    array = (long *)malloc(array_length * sizeof(long));
-
-    for (long i = 0; i < array_length; i++)
+    for (int x = 0; x < 100; x++)
     {
-        array[i] = rand() % 5 + 1;
+        array_length = 10;
+        ThreadsNumber = 1;
+
+        for (int i = 0; i < 7; i++)
+        {
+            array_length *= 10;
+            ThreadsNumber = 1;
+            for (int j = 0; j < 6; j++)
+            {
+                correct_count = 0;
+                count = 0;
+                ThreadsNumber *= 2;
+
+                pthread_mutex_init(&lock, NULL);
+
+                clock_t start_time, check_time1, end_time;
+
+                array = (long *)malloc(array_length * sizeof(long));
+
+                for (long i = 0; i < array_length; i++)
+                {
+                    array[i] = rand() % 5 + 1;
+                }
+                start_time = clock();
+                correct_count = count1s();
+                check_time1 = clock();
+
+                pthread_t T[ThreadsNumber];
+
+                for (int i = 0; i < ThreadsNumber; i++)
+                {
+                    pthread_create(&T[i], NULL, &threadCounting, (void *)i);
+                }
+
+                for (int i = 0; i < ThreadsNumber; i++)
+                {
+                    pthread_join(T[i], NULL);
+                }
+
+                end_time = clock();
+
+                double total_Time_sequential = ((double)(check_time1 - start_time)) / CLOCKS_PER_SEC;
+                double total_Time_parallel = ((double)(end_time - check_time1)) / CLOCKS_PER_SEC;
+
+                printf("%ld\t\t%d\t\t\t%f\t%d\t\t%f\t%d\n", array_length, ThreadsNumber, total_Time_sequential, correct_count, total_Time_parallel, count);
+
+                free(array);
+                pthread_mutex_destroy(&lock);
+
+            
+            }
+        }
     }
-    start_time = clock();
-    correct_count = count1s();
-    check_time1 = clock();
-
-    pthread_t T[ThreadsNumber];
-
-    for (int i = 0; i < ThreadsNumber; i++)
-    {
-        pthread_create(&T[i], NULL, &threadCounting, (void *)i);
-    }
-
-    for (int i = 0; i < ThreadsNumber; i++)
-    {
-        pthread_join(T[i], NULL);
-    }
-
-    end_time = clock();
-
-    double total_Time_sequential = ((double)(check_time1 - start_time)) / CLOCKS_PER_SEC;
-    double total_Time_parallel = ((double)(end_time - check_time1)) / CLOCKS_PER_SEC;
-
-    printf("The number of Threads: \t\t\t%d\n", ThreadsNumber);
-    printf("The Time Taken sequentially: \t\t%f\n", total_Time_sequential);
-    printf("The Correct count of 1's= \t\t%d\n", correct_count);
-    printf("The Time Taken - parallel programming: \t%f\n", total_Time_parallel);
-    printf("The Count of 1s with multiple threads: \t%d\n", count);
-
-    free(array);
-    pthread_mutex_destroy(&lock);
-
-    return 0;
 }
