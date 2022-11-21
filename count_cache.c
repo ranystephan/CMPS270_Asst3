@@ -66,64 +66,49 @@ void *threadCounting(void *my_struct)
 
 int main()
 {
-    printf("Array Length\tThreads Number\tCorrect Count\tCount\n");
+    int count = 0;
 
-    for (int x = 0; x < 100; x++) // testing 100 times
+    clock_t start_time, end_time;
+    start_time = clock();
+
+    array = (long *)malloc(array_length * sizeof(long));
+    threads_independantResults = (long *)malloc(ThreadsNumber * sizeof(long));
+
+    for (long i = 0; i < array_length; i++)
     {
-        array_length = 10;
-        ThreadsNumber = 1;
-
-        for (int i = 0; i < 7; i++)
-        {
-            array_length *= 10;
-            ThreadsNumber = 1;
-            for (int j = 0; j < 6; j++)
-            {
-                correct_count = 0;
-                int count = 0;
-                ThreadsNumber *= 2;
-
-                clock_t start_time, end_time;
-                start_time = clock();
-
-                array = (long *)malloc(array_length * sizeof(long));
-                threads_independantResults = (long *)malloc(ThreadsNumber * sizeof(long));
-
-                for (long i = 0; i < array_length; i++)
-                {
-                    array[i] = rand() % 5 + 1;
-                }
-
-                correct_count = count1s();
-
-                pthread_t T[ThreadsNumber];
-
-                for (int i = 0; i < ThreadsNumber; i++)
-                {
-
-                    struct fill_cache fill;
-                    fill.id = i;
-                    pthread_create(&T[i], NULL, &threadCounting, &fill);
-                }
-
-                for (int i = 0; i < ThreadsNumber; i++)
-                {
-                    pthread_join(T[i], NULL);
-                }
-
-                end_time = clock();
-                double total_Time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
-
-                for (int j = 0; j < ThreadsNumber; j++)
-                {
-                    count += threads_independantResults[j];
-                }
-
-                printf("%ld\t\t%d\t\t\t%d\t\t%d\n", array_length, ThreadsNumber, correct_count, count);
-
-                free(array);
-                free(threads_independantResults);
-            }
-        }
+        array[i] = rand() % 5 + 1;
     }
+
+    correct_count = count1s();
+
+    pthread_t T[ThreadsNumber];
+
+    for (int i = 0; i < ThreadsNumber; i++)
+    {
+
+        struct fill_cache fill;
+        fill.id = i;
+        pthread_create(&T[i], NULL, &threadCounting, &fill);
+    }
+
+    for (int i = 0; i < ThreadsNumber; i++)
+    {
+        pthread_join(T[i], NULL);
+    }
+
+    end_time = clock();
+    double total_Time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+
+    for (int j = 0; j < ThreadsNumber; j++)
+    {
+        count += threads_independantResults[j];
+    }
+
+    printf("# of Threads: %d\n", ThreadsNumber);
+    printf("Time Taken: %f\n", total_Time);
+    printf("Correct count of 1's= %d\n", correct_count);
+    printf("Count of 1s with multiple threads: %d\n", count);
+    free(array);
+    free(threads_independantResults);
+    return 0;
 }
