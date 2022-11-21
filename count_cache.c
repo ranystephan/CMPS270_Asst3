@@ -43,7 +43,6 @@ void *threadCounting(void *my_struct)
     struct fill_cache *struct_ptr = (struct fill_cache *)my_struct; // Cast the void pointer to a struct fill_cache pointer
     long numberofIterations = array_length / ThreadsNumber;
     long startIndex = (struct_ptr->id) * numberofIterations;
-    printf("%d\n", startIndex);
     long endIndex = startIndex + numberofIterations;
 
     int private_counter = 0;
@@ -69,7 +68,7 @@ int main()
 {
     printf("Array Length\tThreads Number\tCorrect Count\tCount\n");
 
-    for (int x = 0; x < 100; x++)
+    for (int x = 0; x < 100; x++) // testing 100 times
     {
         array_length = 10;
         ThreadsNumber = 1;
@@ -120,11 +119,10 @@ int main()
                     count += threads_independantResults[j];
                 }
 
-                printf("%ld\t\t%d\t\t\t%d\t\t%f\n", array_length, ThreadsNumber, correct_count, count);
+                printf("%ld\t\t%d\t\t\t%d\t\t%d\n", array_length, ThreadsNumber, correct_count, count);
 
                 free(array);
                 free(threads_independantResults);
-                return 0;
             }
         }
     }
